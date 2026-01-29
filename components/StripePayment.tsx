@@ -13,7 +13,7 @@ const StripePayment: React.FC = () => {
     if (stripe) {
       const { error } = await stripe.redirectToCheckout({
         lineItems: [{
-          price: 'id_de_votre_prix_stripe', // À récupérer sur votre dashboard Stripe
+          price: 'prod_TshMEAeWmI7pHz', // À récupérer sur votre dashboard Stripe
           quantity: 1,
         }],
         mode: 'payment',
