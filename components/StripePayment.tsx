@@ -52,16 +52,20 @@ const StripePayment: React.FC = () => {
       setLoading(false);
     }
   };
-
-  return (
-    <button 
-      onClick={handleCheckout}
-      disabled={loading}
-      className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 disabled:opacity-50"
-    >
-      {loading ? 'Chargement...' : 'Acheter 10 crédits'}
-    </button>
-  );
-};
-
-export default StripePayment;
+  
+return (
+  <button 
+    onClick={handleCheckout}
+    disabled={loading}
+    className="w-full py-5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-3 bg-white border border-gray-200 text-gray-900 hover:bg-gray-50 shadow-sm active:scale-[0.98] disabled:opacity-50"
+  >
+    {loading ? (
+      <Loader2 size={18} className="animate-spin text-indigo-600" />
+    ) : (
+      <>
+        <CreditCard size={18} className="text-indigo-600" />
+        Acheter 10 crédits
+      </>
+    )}
+  </button>
+);
