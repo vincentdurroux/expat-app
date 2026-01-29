@@ -53,4 +53,15 @@ const StripePayment: React.FC = () => {
     }
   };
 
-  return
+  return (
+    <button 
+      onClick={handleCheckout}
+      disabled={loading}
+      className="bg-indigo-600 text-white px-6 py-3 rounded-lg font-bold hover:bg-indigo-700 disabled:opacity-50"
+    >
+      {loading ? 'Chargement...' : 'Acheter 10 crédits'}
+    </button>
+  );
+};
+
+export default StripePayment;
