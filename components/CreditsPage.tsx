@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Coins, Check, Zap, ShieldCheck, CreditCard, ArrowRight, Loader2, ArrowLeft, ChevronRight, AlertCircle } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { Coins, Check, Zap, ShieldCheck, CreditCard, ArrowLeft, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
+import StripePayment from './StripePayment'; // Assure-toi que le chemin est correct
 
 interface CreditsPageProps {
   currentCredits: number;
@@ -22,7 +23,7 @@ const CreditsPage: React.FC<CreditsPageProps> = ({ currentCredits, isAuth, isRol
     { id: 3, amount: 10, price: 15, label: t('credits.packages.value.label'), description: t('credits.packages.value.desc'), icon: <Zap size={20} className="text-indigo-500" /> },
   ];
 
-  const handleBuy = async (amount: number, id: number) => {
+  const handleBuySimulation = async (amount: number, id: number) => {
     if (!isAuth) {
       onAuthRequired();
       return;
@@ -31,7 +32,6 @@ const CreditsPage: React.FC<CreditsPageProps> = ({ currentCredits, isAuth, isRol
     
     setIsProcessing(id);
     try {
-      // Appel direct à la mise à jour des crédits en base de données (Simulation de succès)
       await onPurchase(amount);
     } catch (err) {
       alert("Une erreur est survenue lors de la mise à jour des crédits.");
@@ -56,92 +56,4 @@ const CreditsPage: React.FC<CreditsPageProps> = ({ currentCredits, isAuth, isRol
             <Coins size={14} />
             {t('credits.balance', { amount: currentCredits })}
           </div>
-          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-[#1d1d1f] mb-4">
-            {t('credits.title')}
-          </h1>
-          <p className="text-gray-500 max-w-xl mx-auto text-base md:text-lg font-medium">
-            {t('credits.subtitle')}
-          </p>
-        </div>
-
-        <div className="relative group/carousel">
-          <div 
-            ref={scrollContainerRef}
-            className="flex overflow-x-auto md:overflow-x-visible pt-6 pb-12 md:pb-0 gap-6 md:grid md:grid-cols-3 md:gap-8 mb-16 no-scrollbar snap-x snap-mandatory"
-          >
-            {packages.map((pkg) => (
-              <div 
-                key={pkg.id} 
-                className={`apple-card p-8 border-2 flex flex-col shrink-0 w-[85vw] sm:w-[320px] md:w-full snap-center relative transition-all duration-300 ${pkg.popular ? 'border-indigo-600 shadow-2xl md:scale-105 z-10' : 'border-gray-100 shadow-sm'} bg-white`}
-              >
-                {pkg.popular && (
-                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] font-black px-4 py-1.5 rounded-full uppercase tracking-widest shadow-lg z-20 whitespace-nowrap">
-                    {t('common.mostPopular')}
-                  </div>
-                )}
-                
-                <div className="flex items-center justify-between mb-8">
-                  <div className="p-4 bg-gray-50 rounded-2xl">{pkg.icon}</div>
-                  <div className="text-right">
-                    <div className="text-4xl font-black">{pkg.amount}</div>
-                    <div className="text-[10px] text-gray-400 font-black uppercase tracking-widest">{t('credits.unit')}</div>
-                  </div>
-                </div>
-
-                <h3 className="text-xl font-black mb-2">{pkg.label}</h3>
-                <p className="text-gray-500 text-sm mb-10 flex-1 leading-relaxed font-medium">{pkg.description}</p>
-
-                <div className="mb-8">
-                  <div className="flex items-baseline gap-1">
-                     <span className="text-5xl font-black tracking-tighter">{pkg.price}</span>
-                     <span className="text-xl font-bold">€</span>
-                  </div>
-                  <div className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">{t('credits.billingNote')}</div>
-                </div>
-
-                <button 
-                  onClick={() => handleBuy(pkg.amount, pkg.id)}
-                  disabled={isProcessing !== null || (isAuth && !isRoleSelected)}
-                  className={`w-full py-5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-3 ${
-                    pkg.popular 
-                    ? 'bg-black text-white hover:bg-gray-800 shadow-xl' 
-                    : 'bg-white border border-gray-200 text-gray-900 hover:bg-gray-50'
-                  } disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]`}
-                >
-                  {isProcessing === pkg.id ? (
-                    <>
-                      <Loader2 size={18} className="animate-spin" />
-                      {t('auth.processing')}
-                    </>
-                  ) : (
-                    <>
-                      <CreditCard size={18} />
-                      {isAuth ? t('credits.buyCTA') : t('common.guestUnlock')}
-                    </>
-                  )}
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex flex-wrap justify-center gap-x-12 gap-y-6 py-10 border-t border-gray-100">
-          <div className="flex items-center gap-3 opacity-60">
-            <ShieldCheck size={18} className="text-emerald-500" />
-            <span className="text-[10px] font-black uppercase tracking-widest">{t('credits.secure')}</span>
-          </div>
-          <div className="flex items-center gap-3 opacity-60">
-            <Check size={18} className="text-emerald-500" />
-            <span className="text-[10px] font-black uppercase tracking-widest">{t('credits.instant')}</span>
-          </div>
-          <div className="flex items-center gap-3 opacity-60">
-            <Coins size={18} className="text-emerald-500" />
-            <span className="text-[10px] font-black uppercase tracking-widest">{t('credits.noExp')}</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default CreditsPage;
+          <h1 className="text-4xl md:text-6xl font-black tracking-tight text-[#1d1d1f]
