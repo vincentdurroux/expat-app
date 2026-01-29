@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { loadStripe } from '@stripe/stripe-js';
 import { createClient } from '@supabase/supabase-js';
 import { CreditCard, Loader2 } from 'lucide-react';
 
@@ -8,15 +7,13 @@ const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
-
 const StripePayment: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   const handleCheckout = async () => {
     setLoading(true);
     try {
-      const stripe = await stripePromise;
+      // 1. Récupérer l'utilisateur connecté
       const { data: { user }, error: userError } = await supabase.auth.getUser();
 
       if (userError || !user) {
@@ -25,23 +22,18 @@ const StripePayment: React.FC = () => {
         return;
       }
 
-      if (!stripe) throw new Error("Stripe n'est pas chargé.");
+      // 2. Ton URL de Payment Link Stripe
+      const stripePaymentLink = "https://buy.stripe.com/test_00weVd2VWgwdgJ8bB38Zq00";
 
-      const { error } = await stripe.redirectToCheckout({
-        lineItems: [{
-          price: 'price_1Suvy3H9juRF89E3V3XEOrCa',
-          quantity: 1,
-        }],
-        mode: 'payment',
-        clientReferenceId: user.id, 
-        successUrl: window.location.origin + '/success',
-        cancelUrl: window.location.origin + '/cancel',
-      });
+      // 3. On ajoute l'ID de l'utilisateur en paramètre pour le Webhook Supabase
+      // On utilise 'client_reference_id' pour que Stripe le renvoie à ton backend
+      const finalUrl = `${stripePaymentLink}?client_reference_id=${user.id}`;
 
-      if (error) throw error;
+      // 4. Redirection directe
+      window.location.href = finalUrl;
 
     } catch (err) {
-      console.error("Erreur Stripe:", err);
+      console.error("Erreur redirection:", err);
       alert("Une erreur est survenue lors de la redirection.");
     } finally {
       setLoading(false);
@@ -57,7 +49,7 @@ const StripePayment: React.FC = () => {
       {loading ? (
         <>
           <Loader2 size={18} className="animate-spin" />
-          Chargement...
+          Redirection...
         </>
       ) : (
         <>
