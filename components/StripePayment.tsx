@@ -1,14 +1,13 @@
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { createClient } from '@supabase/supabase-js';
+import { CreditCard, Loader2 } from 'lucide-react';
 
-// 1. Initialisation de Supabase (Vérifie que tes variables d'environnement sont bien configurées dans Vercel)
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
 );
 
-// 2. Initialisation de Stripe
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
 const StripePayment: React.FC = () => {
@@ -18,8 +17,6 @@ const StripePayment: React.FC = () => {
     setLoading(true);
     try {
       const stripe = await stripePromise;
-
-      // 3. Récupérer l'utilisateur actuel
       const { data: { user }, error: userError } = await supabase.auth.getUser();
 
       if (userError || !user) {
@@ -30,14 +27,12 @@ const StripePayment: React.FC = () => {
 
       if (!stripe) throw new Error("Stripe n'est pas chargé.");
 
-      // 4. Redirection vers la page de paiement Stripe
       const { error } = await stripe.redirectToCheckout({
         lineItems: [{
-          price: 'price_1Suvy3H9juRF89E3V3XEOrCa', // Ton ID de prix
+          price: 'price_1Suvy3H9juRF89E3V3XEOrCa',
           quantity: 1,
         }],
         mode: 'payment',
-        // On passe l'ID de l'utilisateur pour que Supabase sache qui créditer plus tard
         clientReferenceId: user.id, 
         successUrl: window.location.origin + '/success',
         cancelUrl: window.location.origin + '/cancel',
@@ -52,20 +47,26 @@ const StripePayment: React.FC = () => {
       setLoading(false);
     }
   };
-  
-return (
-  <button 
-    onClick={handleCheckout}
-    disabled={loading}
-    className="w-full py-5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-3 bg-white border border-gray-200 text-gray-900 hover:bg-gray-50 shadow-sm active:scale-[0.98] disabled:opacity-50"
-  >
-    {loading ? (
-      <Loader2 size={18} className="animate-spin text-indigo-600" />
-    ) : (
-      <>
-        <CreditCard size={18} className="text-indigo-600" />
-        Acheter 10 crédits
-      </>
-    )}
-  </button>
-);
+
+  return (
+    <button 
+      onClick={handleCheckout}
+      disabled={loading}
+      className="w-full py-5 rounded-2xl font-black text-sm transition-all flex items-center justify-center gap-3 bg-black text-white hover:bg-gray-800 shadow-xl active:scale-[0.98] disabled:opacity-50"
+    >
+      {loading ? (
+        <>
+          <Loader2 size={18} className="animate-spin" />
+          Chargement...
+        </>
+      ) : (
+        <>
+          <CreditCard size={18} />
+          Acheter 10 crédits
+        </>
+      )}
+    </button>
+  );
+};
+
+export default StripePayment;
